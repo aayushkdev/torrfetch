@@ -1,11 +1,19 @@
 import re
-from difflib import SequenceMatcher
+from rapidfuzz.fuzz import token_sort_ratio
 
 def normalize_title(title):
-    return re.sub(r'[^a-zA-Z0-9]', '', title.lower())
+    return re.sub(r'[^a-zA-Z0-9]', ' ', title.lower())
 
-def title_similarity(query, title):
-    return SequenceMatcher(None, normalize_title(query), normalize_title(title)).ratio()
+def score(result, query):
+    base_score = token_sort_ratio(result["title"], query)
+
+    seed_score = min(result["seeders"], 1000) / 10
+
+    exact_match_bonus = 50 if result["title"].lower() == query.lower() else 0
+
+    penalty = -50 if base_score < 70 else 0
+
+    return base_score + seed_score + exact_match_bonus + penalty
 
 def deduplicate(torrents):
     seen = {}
@@ -15,9 +23,7 @@ def deduplicate(torrents):
             seen[key] = t
     return list(seen.values())
 
-def rank_results(query, deduped_results):
-    for t in deduped_results:
-        relevance = title_similarity(query, t["title"])
-        seeders = t.get("seeders", 0)
-        t["_score"] = relevance * 0.7 + (min(seeders, 1000) / 1000) * 0.3  # 70% relevance, 30% seeders
-    return sorted(deduped_results, key=lambda x: x["_score"], reverse=True)
+def rank_results(query, results):
+    for r in results:
+        r["_score"] = score(r, query)
+    return sorted(results, key=lambda x: x["_score"], reverse=True)
