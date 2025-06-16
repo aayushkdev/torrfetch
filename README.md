@@ -4,14 +4,14 @@
 
 ## Features
 
-- Search multiple torrent providers in parallel  
+- Search multiple torrent providers in parallel or fallback mode  
 - Automatic deduplication of results  
-- Smart sorting by relevance and seeders  
-- Fast and extensible provider interface  
+- Smart scoring by title relevance and seeders  
+- Fast and extensible provider interface   
 
 ## Providers
 
-**Currently supports:**
+Currently supports:
 - The Pirate Bay
 - yts
 
@@ -23,11 +23,24 @@ pip install torrfetch
 
 ## Usage
 
-```bash
-from torrfetch import search
-
-results = search("oppenheimer 2023 1080p")
+### Parallel mode (default)
+All providers are queried simultaneously, and the output is ranked by relevance and seeders
+```python
+torrfetch.search("oppenheimer 2023 1080p", mode="parallel")
 ```
+
+### Fallback mode
+Queries providers one by one, proceeding to the next if the current one is down or returns no results
+```python
+torrfetch.search("oppenheimer", mode="fallback")
+```
+
+### Restrict to specific providers
+Use `only` to limit the search to a subset of sources (e.g., just YTS or YTS and Piratebay):
+```python
+torrfetch.search("oppenheimer", only=["yts"])
+```
+
 ## Sample data returned
 The first 30 results are returned, sorted by a combination of relevance and seeders:
 ```
