@@ -2,7 +2,7 @@ import asyncio
 from torrfetch import sources
 from .utils import deduplicate, rank_results
 
-async def search_torrents(query, mode="parallel", only=None):
+async def search_torrents_async(query, mode="parallel", only=None):
     all_providers = sources.get_all()
 
     if only:
@@ -46,5 +46,5 @@ async def search_torrents(query, mode="parallel", only=None):
     ranked = rank_results(query, results)
     return ranked[:30]
 
-def search_torrents_sync(query, mode="parallel", only=None):
-    return asyncio.run(search_torrents(query, mode, only))
+def search_torrents(query, mode="parallel", only=None):
+    return asyncio.run(search_torrents_async(query, mode, only))

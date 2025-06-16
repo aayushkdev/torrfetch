@@ -26,19 +26,19 @@ pip install torrfetch
 ### Parallel mode (default)
 All providers are queried simultaneously, and the output is ranked by relevance and seeders
 ```python
-torrfetch.search("oppenheimer 2023 1080p", mode="parallel")
+torrfetch.search_torrents("oppenheimer 2023 1080p", mode="parallel")
 ```
 
 ### Fallback mode
 Queries providers one by one, proceeding to the next if the current one is down or returns no results
 ```python
-torrfetch.search("oppenheimer", mode="fallback")
+torrfetch.search_torrents("oppenheimer", mode="fallback")
 ```
 
 ### Restrict to specific providers
 Use `only` to limit the search to a subset of sources (e.g., just YTS or YTS and Piratebay):
 ```python
-torrfetch.search("oppenheimer", only=["yts"])
+torrfetch.search_torrents("oppenheimer", only=["yts"])
 ```
 
 ## Sample data returned
