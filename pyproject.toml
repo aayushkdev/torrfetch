@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "torrfetch"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Python package to fetch torrent metadata from multiple sources"
 authors = [
     { name = "Aayush Kumar", email = "aayush214.kumar@gmail.com" }
