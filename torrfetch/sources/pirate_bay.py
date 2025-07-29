@@ -3,13 +3,14 @@ from bs4 import BeautifulSoup
 
 BASE_URL = "https://tpirbay.xyz"
 
-async def search(query):
+async def search(query, timeout=10):
     results = []
     search_url = f"{BASE_URL}/search/{query.replace(' ', '%20')}/1/7/0"
     headers = {"User-Agent": "Mozilla/5.0"}
 
     try:
-        async with aiohttp.ClientSession() as session:
+        timeout_obj = aiohttp.ClientTimeout(total=timeout)
+        async with aiohttp.ClientSession(timeout=timeout_obj) as session:
             async with session.get(search_url, headers=headers) as resp:
                 if resp.status != 200:
                     return []

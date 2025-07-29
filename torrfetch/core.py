@@ -2,7 +2,7 @@ import asyncio
 from torrfetch import sources
 from .utils import deduplicate, rank_results
 
-async def search_torrents_async(query, mode="parallel", only=None):
+async def search_torrents_async(query, mode="parallel", only=None, timeout=30):
     all_providers = sources.get_all()
 
     if only:
@@ -15,8 +15,15 @@ async def search_torrents_async(query, mode="parallel", only=None):
 
 
     if mode == "parallel":
-        tasks = [provider.search(query) for provider in providers.values()]
-        all_results = await asyncio.gather(*tasks, return_exceptions=True)
+        tasks = [provider.search(query, timeout=timeout) for provider in providers.values()]
+        try:
+            all_results = await asyncio.wait_for(
+                asyncio.gather(*tasks, return_exceptions=True), 
+                timeout=timeout
+            )
+        except asyncio.TimeoutError:
+            # If overall timeout occurs, return empty results
+            all_results = []
 
         flat_results = []
         for res in all_results:
@@ -29,11 +36,14 @@ async def search_torrents_async(query, mode="parallel", only=None):
         flat_results = []
         for name, provider in providers.items():
             try:
-                results = await provider.search(query)
+                results = await asyncio.wait_for(
+                    provider.search(query, timeout=timeout), 
+                    timeout=timeout
+                )
                 if results:
                     flat_results = results
                     break
-            except Exception:
+            except (Exception, asyncio.TimeoutError):
                 continue
     else:
         raise ValueError(f"Unknown search mode: {mode}")
@@ -46,5 +56,5 @@ async def search_torrents_async(query, mode="parallel", only=None):
     ranked = rank_results(query, results)
     return ranked[:30]
 
-def search_torrents(query, mode="parallel", only=None):
-    return asyncio.run(search_torrents_async(query, mode, only))
+def search_torrents(query, mode="parallel", only=None, timeout=30):
+    return asyncio.run(search_torrents_async(query, mode, only, timeout))

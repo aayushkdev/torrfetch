@@ -17,9 +17,9 @@ def build_magnet(hash_, title):
     dn = urllib.parse.quote(title)
     return f"magnet:?xt=urn:btih:{hash_}&dn={dn}&{trackers}"
 
-async def search(query, limit=30, page=1, sort_by="seeds"):
+async def search(query, limit=30, page=1, sort_by="seeds", timeout=2):
     results = []
-    url = "https://yts.am/api/v2/list_movies.json"
+    url = "https://yts.mx/api/v2/list_movies.json"
     params = {
         "query_term": query,
         "limit": limit,
@@ -28,7 +28,8 @@ async def search(query, limit=30, page=1, sort_by="seeds"):
     }
 
     try:
-        async with aiohttp.ClientSession() as session:
+        timeout_obj = aiohttp.ClientTimeout(total=timeout)
+        async with aiohttp.ClientSession(timeout=timeout_obj) as session:
             async with session.get(url, params=params) as resp:
                 if resp.status != 200:
                     return []
